@@ -89,7 +89,6 @@ class Grid(object):
     def decay_paths(self):
         for field in self.fields:
             for neighbour in field.neighbours:
-                #print neighbour
                 if neighbour[1] > 0:
                     neighbour[1] *= 0.5
                 if neighbour[2] > 0:
@@ -148,7 +147,7 @@ class Ant(object):
         # lookup food path
         if self.engine.ant_ai:
             path_field = max(pfields, key = lambda field: field[1]) # 1 means food
-            if path_field[1] > 0:
+            if path_field[1] > 10:
                 new_field = path_field[0] # 0 means object
 
         # look for food
@@ -158,7 +157,7 @@ class Ant(object):
             self.state = 'take_food'
 
         # pick randomly
-        if not new_field:
+        if not new_field or random.randint(0, 4) == 0:
             new_field = random.choice(pfields)[0]
 
         self.move(new_field)
@@ -176,20 +175,16 @@ class Ant(object):
         # lookup home path
         if self.engine.ant_ai:
             path_field = max(pfields, key = lambda field: field[2]) # 2 means home
-            #print path_field
-            if path_field[2] > 0:
+            if path_field[2] > 10:
                 new_field = path_field[0] # 0 means object
 
         # look for home
         home_field = [field for field in pfields if field[0].home]
         if home_field:
-            #print('home found')
             new_field = home_field[0][0]
-            #self.excitement = 10000
             self.state = 'return_home'
-            #self.origin = None
 
-        if not new_field:
+        if not new_field or random.randint(0, 4) == 0:
             new_field = random.choice(pfields)[0]
 
         self.move(new_field)        
@@ -256,15 +251,6 @@ class AntEngine(object):
         self.ants = []
         for _ in range(self.ant_count):
             self.spawn_ant()
-            '''
-            new_ant = Ant(
-                home = grid_home,
-                field = grid_home,
-                grid = self.grid,
-                engine = self
-            )
-            self.ants.append(new_ant)
-            '''
 
     def spawn_ant(self):
         new_ant = Ant(
@@ -277,7 +263,6 @@ class AntEngine(object):
 
     def tick(self):
         self.ants_count = len(self.ants)
-        #print(self.ants_count)
 
         self.grid.decay_paths()
         for ant in self.ants:
@@ -286,24 +271,11 @@ class AntEngine(object):
             status = 'state: {0} pos: {1} inv: {2}'.format(
                 ant.state, (f.x, f.y), ant.inventory
             )
-            #print(status)
 
-        if self.spawn_ants:# and self.food_count > 100:
+        if self.spawn_ants:
             while self.food_count > 100:
                 self.spawn_ant()
                 self.food_count -= 100
-
-
-        #index = round(self.returns / float(self.ants_count), 2)
-        #self.returns = 0
-        #print(index)
-
-        # no longer needed, food is int!
-        '''
-        for field in self.grid.fields:
-            if round(field.food, 2) == 0:
-                field.food = 0
-        '''
 
     def count_ants(self, antfield):
         for field in self.grid.fields:
@@ -320,7 +292,6 @@ if __name__ == '__main__':
     while True:
         try:
             engine.tick()
-            #print('tick')
             time.sleep(0.2)
         except KeyboardInterrupt:
             break

@@ -8,15 +8,15 @@ class FieldHandler(object):
 
         self.resoltuion = resolution
 
-        self.grid_size = 15
+        self.grid_size = 25
 
         self.field_size = resolution[0] / self.grid_size
 
         self.engine = AntEngine(
-            antcount = 100,
+            antcount = 50,
             grid_size_x = self.grid_size,
             grid_size_y = self.grid_size,
-            food_quant = 0,
+            food_quant = 10,
             inf_food = False,
             min_food = 10000,
             max_food = 50000,
