@@ -2,26 +2,27 @@ from engine import AntEngine
 import pygame
 import time
 
+
 class FieldHandler(object):
 
-    def __init__(self, resolution = (800,800)):
+    def __init__(self, resolution=(800, 800)):
 
         self.resoltuion = resolution
 
-        self.grid_size = 25
+        self.grid_size = 30
 
         self.field_size = resolution[0] / self.grid_size
 
         self.engine = AntEngine(
-            antcount = 50,
-            grid_size_x = self.grid_size,
-            grid_size_y = self.grid_size,
-            food_quant = 10,
-            inf_food = False,
-            min_food = 10000,
-            max_food = 50000,
-            spawn_ants = True,
-            ant_ai = True
+            antcount=100,
+            grid_size_x=self.grid_size,
+            grid_size_y=self.grid_size,
+            food_quant=100,
+            inf_food=False,
+            min_food=50000,
+            max_food=50000,
+            spawn_ants=True,
+            ant_ai=True
         )
 
         self.grid = self.engine.grid
@@ -53,7 +54,7 @@ class FieldHandler(object):
                 field.blocked = False
 
     def draw_fields(self, display):
-        #time.sleep(0.5)
+        # time.sleep(0.5)
         if self.run_engine:
             self.engine.tick()
         for field in self.grid.fields:
@@ -70,9 +71,9 @@ class FieldHandler(object):
 
             if field.food > 0:
                 red = 255
-                #print(field.food)
-                #food_ant_count = self.engine.count_ants(field)
-                #print(food_ant_count)
+                # print(field.food)
+                # food_ant_count = self.engine.count_ants(field)
+                # print(food_ant_count)
 
             ant_count = self.engine.count_ants(field)
             ants_count = float(self.engine.ants_count)

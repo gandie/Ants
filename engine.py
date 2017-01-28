@@ -1,26 +1,25 @@
 import random
 import time
 
+
 class Field(object):
 
-    def __init__(self, x = 0, y = 0,
-                 foodpath = 0, food = 0,
-                 homepath = 0,
-                 blocked = False, home = False
-    ):
+    def __init__(self, x=0, y=0, food=0,
+                 blocked=False, home=False
+                 ):
         self.x = x
         self.y = y
-        self.foodpath = foodpath
-        self.homepath = homepath
         self.food = food
         self.blocked = blocked
         self.home = home
 
         self.neighbours = []
 
+
 class Grid(object):
-    def __init__(self, size_x = 10, size_y = 10, food_quant = 1, 
-                 min_food = 1000, max_food = 5000):
+
+    def __init__(self, size_x=10, size_y=10, food_quant=1,
+                 min_food=1000, max_food=5000):
         self.size_x = size_x
         self.size_y = size_y
         self.food_quant = food_quant
@@ -38,8 +37,8 @@ class Grid(object):
         for xi in range(self.size_x):
             for yi in range(self.size_y):
                 field = Field(
-                    x = xi,
-                    y = yi
+                    x=xi,
+                    y=yi
                 )
                 self.fields.append(field)
 
@@ -74,11 +73,11 @@ class Grid(object):
 
     def get_nfields(self, nx, ny):
         result = []
-        pos_x = [nx-1,nx,nx+1]
-        pos_y = [ny-1,ny,ny+1]
-        pos_comb = [(x,y) for x in pos_x for y in pos_y]
+        pos_x = [nx - 1, nx, nx + 1]
+        pos_y = [ny - 1, ny, ny + 1]
+        pos_comb = [(x, y) for x in pos_x for y in pos_y]
         for pos in pos_comb:
-            field = self.get_field_c(pos[0],pos[1])
+            field = self.get_field_c(pos[0], pos[1])
             if not field:
                 continue
             if field.x == nx and field.y == ny:
@@ -96,8 +95,9 @@ class Grid(object):
 
 
 class Ant(object):
-    def __init__(self, field = None, origin = None, home = None, engine = None,
-                 grid = None, state = 'food', inventory_size = 5):
+
+    def __init__(self, field=None, origin=None, home=None, engine=None,
+                 grid=None, state='food', inventory_size=5):
         self.field = field
         self.origin = origin
         self.home = home
@@ -112,15 +112,15 @@ class Ant(object):
         self.excitement = 10000
 
         self.state_map = {
-            'food' : self.search_food,
-            'idle' : self.do_nothing,
-            'take_food' : self.take_food,
-            'go_home' : self.go_home,
-            'return_home' : self.return_home
+            'food': self.search_food,
+            'idle': self.do_nothing,
+            'take_food': self.take_food,
+            'go_home': self.go_home,
+            'return_home': self.return_home
         }
-    
+
     def run(self):
-        
+
         pfields = self.field.neighbours
 
         if self.excitement > 0:
@@ -134,7 +134,7 @@ class Ant(object):
         self.origin = self.field
         self.field = new_field
 
-    def search_food(self, pfields): 
+    def search_food(self, pfields):
         new_field = None
 
         # remove blocked
@@ -146,9 +146,10 @@ class Ant(object):
 
         # lookup food path
         if self.engine.ant_ai:
-            path_field = max(pfields, key = lambda field: field[1]) # 1 means food
+            # 1 means food
+            path_field = max(pfields, key=lambda field: field[1])
             if path_field[1] > 10:
-                new_field = path_field[0] # 0 means object
+                new_field = path_field[0]  # 0 means object
 
         # look for food
         food_field = [field for field in pfields if field[0].food > 0]
@@ -174,9 +175,10 @@ class Ant(object):
 
         # lookup home path
         if self.engine.ant_ai:
-            path_field = max(pfields, key = lambda field: field[2]) # 2 means home
+            # 2 means home
+            path_field = max(pfields, key=lambda field: field[2])
             if path_field[2] > 10:
-                new_field = path_field[0] # 0 means object
+                new_field = path_field[0]  # 0 means object
 
         # look for home
         home_field = [field for field in pfields if field[0].home]
@@ -187,7 +189,7 @@ class Ant(object):
         if not new_field or random.randint(0, 4) == 0:
             new_field = random.choice(pfields)[0]
 
-        self.move(new_field)        
+        self.move(new_field)
 
     def return_home(self, pfields):
         if self.inventory > 0:
@@ -214,37 +216,38 @@ class Ant(object):
 
     def put_trace(self, new_field):
         for triple in new_field.neighbours:
-            #print triple
+            # print triple
             if triple[0] != self.field:
                 continue
             if self.state == 'go_home' or self.state == 'return_home':
-                triple[1] += self.excitement # [1] means food trace!
+                triple[1] += self.excitement  # [1] means food trace!
             if self.state == 'food' or self.state == 'take_food':
-                triple[2] += self.excitement # [2] means home trace!
-            
+                triple[2] += self.excitement  # [2] means home trace!
+
+
 class AntEngine(object):
 
-    def __init__(self, antcount = 1, grid_size_x = 10, grid_size_y = 10, 
-                 food_quant = 1, inf_food = True, min_food = 1000, 
-                 max_food = 5000, spawn_ants = True, ant_ai = True):
+    def __init__(self, antcount=1, grid_size_x=10, grid_size_y=10,
+                 food_quant=1, inf_food=True, min_food=1000,
+                 max_food=5000, spawn_ants=True, ant_ai=True):
 
         self.ant_ai = ant_ai
 
         self.food_count = 0
         self.ants_count = 0
-        self.grid_size = grid_size_x # !!
+        self.grid_size = grid_size_x  # !!
         self.returns = 0
 
         self.spawn_ants = spawn_ants
         self.ant_count = antcount
-        
+
         self.inf_food = inf_food
         self.grid = Grid(
-            size_x = grid_size_x,
-            size_y = grid_size_y,
-            food_quant = food_quant,
-            min_food = min_food,
-            max_food = max_food
+            size_x=grid_size_x,
+            size_y=grid_size_y,
+            food_quant=food_quant,
+            min_food=min_food,
+            max_food=max_food
         )
         self.grid_home = self.grid.home_field
 
@@ -254,15 +257,16 @@ class AntEngine(object):
 
     def spawn_ant(self):
         new_ant = Ant(
-            home = self.grid_home,
-            field = self.grid_home,
-            grid = self.grid,
-            engine = self
+            home=self.grid_home,
+            field=self.grid_home,
+            grid=self.grid,
+            engine=self
         )
         self.ants.append(new_ant)
 
     def tick(self):
         self.ants_count = len(self.ants)
+
 
         self.grid.decay_paths()
         for ant in self.ants:
