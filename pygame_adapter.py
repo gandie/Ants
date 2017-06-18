@@ -9,7 +9,7 @@ class FieldHandler(object):
 
         self.resoltuion = resolution
 
-        self.grid_size = 30
+        self.grid_size = 50
 
         self.field_size = resolution[0] / self.grid_size
 
@@ -17,10 +17,10 @@ class FieldHandler(object):
             antcount=100,
             grid_size_x=self.grid_size,
             grid_size_y=self.grid_size,
-            food_quant=100,
+            food_quant=250,
             inf_food=False,
-            min_food=50000,
-            max_food=50000,
+            min_food=5000,
+            max_food=5000,
             spawn_ants=True,
             ant_ai=True
         )
@@ -75,10 +75,12 @@ class FieldHandler(object):
                 # food_ant_count = self.engine.count_ants(field)
                 # print(food_ant_count)
 
-            ant_count = self.engine.count_ants(field)
+            #ant_count = self.engine.count_ants(field)
+            #ants_count = float(self.engine.ants_count)
+            ant_count = abs(field.antcount)
             ants_count = float(self.engine.ants_count)
-            if ants_count != 0:
-                blue = int(10 * 255 * (ant_count / ants_count))
+            if ants_count != 0 and ant_count > 0:
+                blue = int(10 * 255 * (ant_count / ants_count ** (0.7)))
             if blue > 255:
                 blue = 255
 
