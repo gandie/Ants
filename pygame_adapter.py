@@ -9,7 +9,7 @@ class FieldHandler(object):
 
         self.resoltuion = resolution
 
-        self.grid_size = 50
+        self.grid_size = 75
 
         self.field_size = resolution[0] / self.grid_size
 
@@ -17,7 +17,7 @@ class FieldHandler(object):
             antcount=100,
             grid_size_x=self.grid_size,
             grid_size_y=self.grid_size,
-            food_quant=250,
+            food_quant=500,
             inf_food=False,
             min_food=5000,
             max_food=5000,

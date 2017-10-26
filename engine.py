@@ -48,7 +48,10 @@ class Grid(object):
             field.food = random.randint(self.min_food, self.max_food)
 
     def add_home(self):
-        field = random.choice(self.fields)
+        # field = random.choice(self.fields)
+        x = self.size_x / 2
+        y = self.size_y / 2
+        field = self.get_field_c(x, y)
         field.home = True
         self.home_field = field
 
@@ -259,7 +262,7 @@ class AntEngine(object):
             self.spawn_ant()
 
     def spawn_ant(self):
-        if not self.ants_count > 100000:
+        if not self.ants_count > 15000:
             new_ant = Ant(
                 home=self.grid_home,
                 field=self.grid_home,
