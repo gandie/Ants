@@ -1,27 +1,28 @@
-from engine import AntEngine
+from ants.engine import AntEngine
 import pygame
 import time
 
 
 class FieldHandler(object):
 
-    def __init__(self, resolution=(800, 800)):
+    def __init__(self, resolution=(800, 800), grid_size=25, food_quant=100,
+                 spawn_ants=True, startants=25):
 
         self.resoltuion = resolution
 
-        self.grid_size = 75
+        self.grid_size = grid_size
 
         self.field_size = resolution[0] / self.grid_size
 
         self.engine = AntEngine(
-            antcount=100,
+            antcount=startants,
             grid_size_x=self.grid_size,
             grid_size_y=self.grid_size,
-            food_quant=500,
+            food_quant=food_quant,
             inf_food=False,
-            min_food=5000,
-            max_food=5000,
-            spawn_ants=True,
+            min_food=500,
+            max_food=500,
+            spawn_ants=spawn_ants,
             ant_ai=True
         )
 
@@ -31,8 +32,8 @@ class FieldHandler(object):
         self.run_engine = False
 
     def click(self, pos):
-        x = pos[0] / self.field_size
-        y = pos[1] / self.field_size
+        x = int(pos[0] / self.field_size)
+        y = int(pos[1] / self.field_size)
         for field in self.grid.fields:
             if not field.x == x:
                 continue
@@ -41,8 +42,8 @@ class FieldHandler(object):
             field.food += 10000
 
     def right_click(self, pos):
-        x = pos[0] / self.field_size
-        y = pos[1] / self.field_size
+        x = int(pos[0] / self.field_size)
+        y = int(pos[1] / self.field_size)
         for field in self.grid.fields:
             if not field.x == x:
                 continue
@@ -71,12 +72,7 @@ class FieldHandler(object):
 
             if field.food > 0:
                 red = 255
-                # print(field.food)
-                # food_ant_count = self.engine.count_ants(field)
-                # print(food_ant_count)
 
-            #ant_count = self.engine.count_ants(field)
-            #ants_count = float(self.engine.ants_count)
             ant_count = abs(field.antcount)
             ants_count = float(self.engine.ants_count)
             if ants_count != 0 and ant_count > 0:

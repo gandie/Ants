@@ -34,8 +34,8 @@ class Grid(object):
         self.init_neighbours()
 
     def create(self):
-        for xi in xrange(self.size_x):
-            for yi in xrange(self.size_y):
+        for xi in range(self.size_x):
+            for yi in range(self.size_y):
                 field = Field(
                     x=xi,
                     y=yi
@@ -43,14 +43,14 @@ class Grid(object):
                 self.fields.append(field)
 
     def add_food(self):
-        for _ in xrange(self.food_quant):
+        for _ in range(self.food_quant):
             field = random.choice(self.fields)
             field.food = random.randint(self.min_food, self.max_food)
 
     def add_home(self):
         # field = random.choice(self.fields)
-        x = self.size_x / 2
-        y = self.size_y / 2
+        x = int(self.size_x / 2)
+        y = int(self.size_y / 2)
         field = self.get_field_c(x, y)
         field.home = True
         self.home_field = field
@@ -258,7 +258,7 @@ class AntEngine(object):
         self.grid_home = self.grid.home_field
 
         self.ants = []
-        for _ in xrange(self.ant_count):
+        for _ in range(self.ant_count):
             self.spawn_ant()
 
     def spawn_ant(self):
@@ -273,7 +273,7 @@ class AntEngine(object):
 
     def tick(self):
         self.ants_count = len(self.ants)
-        print 'Ants:', self.ants_count
+        print('Ants:', self.ants_count)
         self.grid.decay_paths()
         for ant in self.ants:
             ant.run()
