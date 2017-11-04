@@ -13,7 +13,8 @@ python3 setup.py install
 ```
 
 # Usage
-’’’
+
+```
 usage: ants [-h] [-g GRIDSIZE] [-s STARTANTS] [-f FOOD] [--nospawn]
 
 optional arguments:
@@ -24,4 +25,4 @@ optional arguments:
                         Number of ants spawned at start. Default 25
   -f FOOD, --food FOOD  Number of food fields at start. Default 100
   --nospawn             Prevent spawning new ants
-’’’
+```
