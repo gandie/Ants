@@ -26,7 +26,8 @@ class Grid(object):
         self.min_food = min_food
         self.max_food = max_food
 
-        self.fields = []
+        # self.fields = []
+        self.fields = {}
         self.create()
         self.add_food()
         self.add_home()
@@ -40,11 +41,12 @@ class Grid(object):
                     x=xi,
                     y=yi
                 )
-                self.fields.append(field)
+                # self.fields.append(field)
+                self.fields[(xi, yi)] = field
 
     def add_food(self):
         for _ in range(self.food_quant):
-            field = random.choice(self.fields)
+            field = random.choice(list(self.fields.values()))
             field.food = random.randint(self.min_food, self.max_food)
 
     def add_home(self):
@@ -56,7 +58,7 @@ class Grid(object):
         self.home_field = field
 
     def init_neighbours(self):
-        for field in self.fields:
+        for field in self.fields.values():
             x = field.x
             y = field.y
             for nfield in self.get_nfields(x, y):
@@ -68,6 +70,7 @@ class Grid(object):
                 field.neighbours.append(field_d)
 
     def get_field_c(self, cx, cy):
+        '''
         result = None
         for field in self.fields:
             if not field.x == cx:
@@ -75,7 +78,8 @@ class Grid(object):
             if not field.y == cy:
                 continue
             result = field
-        return result
+        '''
+        return self.fields.get((cx, cy))
 
     def get_nfields(self, nx, ny):
         pos_x = [nx - 1, nx, nx + 1]
@@ -90,12 +94,11 @@ class Grid(object):
             yield field
 
     def decay_paths(self):
-        for field in self.fields:
+        # expensive!
+        for field in self.fields.values():
             for neighbour in field.neighbours:
-                if neighbour['food_trace'] > 0:
-                    neighbour['food_trace'] *= 0.9
-                if neighbour['home_trace'] > 0:
-                    neighbour['home_trace'] *= 0.9
+                neighbour['food_trace'] *= 0.9
+                neighbour['home_trace'] *= 0.9
 
 
 class Ant(object):
@@ -159,10 +162,9 @@ class Ant(object):
 
         # lookup food path
         if self.engine.ant_ai and new_field is None:
-            # 1 means food
             path_field = max(pfields, key=lambda field: field['food_trace'])
             if path_field['food_trace'] > 1:
-                new_field = path_field['field']  # 0 means object
+                new_field = path_field['field']
 
         # pick randomly
         if not new_field or random.randint(0, 4) == 0:
