@@ -12,13 +12,7 @@ class Field(object):
         self.food = food
         self.blocked = blocked
         self.home = home
-        self.neighbours = []
         self.antcount = antcount
-
-    def decay_paths(self):
-        for neighbour in self.neighbours:
-            neighbour['food_trace'] *= 0.9
-            neighbour['home_trace'] *= 0.9
 
 
 class Grid(object):
@@ -61,16 +55,16 @@ class Grid(object):
         self.home_field = field
 
     def init_neighbours(self):
+        self.neighbours = {}
         for field in self.fields.values():
             x = field.x
             y = field.y
+            self.neighbours[field] = {}
             for nfield in self.get_nfields(x, y):
-                field_d = {
-                    'field': nfield,
+                self.neighbours[field][nfield] = {
                     'food_trace': 0,
                     'home_trace': 0
                 }
-                field.neighbours.append(field_d)
 
     def get_field_c(self, cx, cy):
         return self.fields.get((cx, cy))
@@ -88,9 +82,10 @@ class Grid(object):
             yield field
 
     def decay_paths(self):
-        # expensive!
-        for field in self.fields.values():
-            field.decay_paths()
+        for field in self.neighbours:
+            for neighbour in self.neighbours[field]:
+                self.neighbours[field][neighbour]['food_trace'] *= 0.9
+                self.neighbours[field][neighbour]['home_trace'] *= 0.9
 
 
 class Ant(object):
@@ -120,7 +115,14 @@ class Ant(object):
 
     def run(self):
 
-        pfields = self.field.neighbours
+        pfields = []
+        for field in self.grid.neighbours[self.field]:
+            field_d = {
+                'field': field,
+                'food_trace': self.grid.neighbours[self.field][field]['food_trace'],
+                'home_trace': self.grid.neighbours[self.field][field]['home_trace'],
+            }
+            pfields.append(field_d)
 
         if self.excitement > 0:
             self.excitement *= 0.75
@@ -215,14 +217,13 @@ class Ant(object):
         pass
 
     def put_trace(self, new_field):
-        for field_d in new_field.neighbours:
-            # print field_d
-            if field_d['field'] != self.field:
+        for field in self.grid.neighbours[new_field]:
+            if field != self.field:
                 continue
             if self.state == 'go_home' or self.state == 'return_home':
-                field_d['food_trace'] += self.excitement
+                self.grid.neighbours[new_field][field]['food_trace'] += self.excitement
             if self.state == 'food' or self.state == 'take_food':
-                field_d['home_trace'] += self.excitement
+                self.grid.neighbours[new_field][field]['home_trace'] += self.excitement
 
 
 class AntEngine(object):
