@@ -15,6 +15,11 @@ class Field(object):
         self.neighbours = []
         self.antcount = antcount
 
+    def decay_paths(self):
+        for neighbour in self.neighbours:
+            neighbour['food_trace'] *= 0.9
+            neighbour['home_trace'] *= 0.9
+
 
 class Grid(object):
 
@@ -26,7 +31,6 @@ class Grid(object):
         self.min_food = min_food
         self.max_food = max_food
 
-        # self.fields = []
         self.fields = {}
         self.create()
         self.add_food()
@@ -41,7 +45,6 @@ class Grid(object):
                     x=xi,
                     y=yi
                 )
-                # self.fields.append(field)
                 self.fields[(xi, yi)] = field
 
     def add_food(self):
@@ -70,15 +73,6 @@ class Grid(object):
                 field.neighbours.append(field_d)
 
     def get_field_c(self, cx, cy):
-        '''
-        result = None
-        for field in self.fields:
-            if not field.x == cx:
-                continue
-            if not field.y == cy:
-                continue
-            result = field
-        '''
         return self.fields.get((cx, cy))
 
     def get_nfields(self, nx, ny):
@@ -96,9 +90,7 @@ class Grid(object):
     def decay_paths(self):
         # expensive!
         for field in self.fields.values():
-            for neighbour in field.neighbours:
-                neighbour['food_trace'] *= 0.9
-                neighbour['home_trace'] *= 0.9
+            field.decay_paths()
 
 
 class Ant(object):

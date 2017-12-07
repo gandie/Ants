@@ -34,21 +34,15 @@ class FieldHandler(object):
     def click(self, pos):
         x = int(pos[0] / self.field_size)
         y = int(pos[1] / self.field_size)
-        for field in self.grid.fields:
-            if not field.x == x:
-                continue
-            if not field.y == y:
-                continue
-            field.food += 10000
+        field = self.grid.get_field_c(x, y)
+        if field is not None:
+            field.food += 1000
 
     def right_click(self, pos):
         x = int(pos[0] / self.field_size)
         y = int(pos[1] / self.field_size)
-        for field in self.grid.fields.values():
-            if not field.x == x:
-                continue
-            if not field.y == y:
-                continue
+        field = self.grid.get_field_c(x, y)
+        if field is not None:
             if not field.blocked:
                 field.blocked = True
             else:
@@ -58,6 +52,7 @@ class FieldHandler(object):
         # time.sleep(0.5)
         if self.run_engine:
             self.engine.tick()
+
         for field in self.grid.fields.values():
             red = 0
             green = 0
@@ -97,4 +92,6 @@ class FieldHandler(object):
                 field.y * self.field_size
             )
             display.blit(field_surface, pos)
+        '''
+        '''
         return display
