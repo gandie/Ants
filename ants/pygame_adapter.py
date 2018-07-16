@@ -6,7 +6,7 @@ import time
 class FieldHandler(object):
 
     def __init__(self, resolution=(800, 800), grid_size=25, food_quant=100,
-                 spawn_ants=True, startants=25):
+                 spawn_ants=True, startants=25, colony_count=1):
 
         self.resoltuion = resolution
 
@@ -15,19 +15,19 @@ class FieldHandler(object):
         self.field_size = resolution[0] / self.grid_size
 
         self.engine = AntEngine(
-            antcount=startants,
+            start_ants=startants,
             grid_size_x=self.grid_size,
             grid_size_y=self.grid_size,
             food_quant=food_quant,
             inf_food=False,
-            min_food=500,
-            max_food=500,
+            min_food=5000,
+            max_food=5000,
             spawn_ants=spawn_ants,
-            ant_ai=True
+            ant_ai=True,
+            colony_count=colony_count
         )
 
         self.grid = self.engine.grid
-        self.ants = self.engine.ants
 
         self.run_engine = False
 
@@ -62,7 +62,7 @@ class FieldHandler(object):
                 (self.field_size, self.field_size)
             )
 
-            if field.home:
+            if field.is_home:
                 green = 255
 
             if field.food > 0:

@@ -20,7 +20,8 @@ def main(args):
         'food_quant': args.food,
         'spawn_ants': not args.nospawn,
         'startants': args.startants,
-        'resolution': RESOLUTION
+        'resolution': RESOLUTION,
+        'colony_count': args.colonys,
     }
 
     pygame.init()

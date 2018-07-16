@@ -42,6 +42,14 @@ if __name__ == '__main__':
         default=25
     )
     parser.add_argument(
+        '-c',
+        '--colonys',
+        help='Number of ant colonys created. Default 1',
+        type=int,
+        default=1
+    )
+
+    parser.add_argument(
         '-s',
         '--startants',
         help='Number of ants spawned at start. Default 25',

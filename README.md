@@ -2,11 +2,16 @@
 
 Simple Pygame-based Ants Simulator
 
+Ants (indicated by blue color) are "stupid" state-machines and can only "see"
+neighbouring fields. By laying traces the ants are still able to find efficient
+paths to the food sources (red) and bring it back to the nest (green). For each
+100 units of food returned to the nest a new ant will spawn.
+
 # Installation
 
-This python package can be installed (optionally, but strongly recommended into a <a href="http://docs.python-guide.org/en/latest/dev/virtualenvs/#lower-level-virtualenv">virtualenv</a>)
-after requirements have been installed:
+This python package can be installed after requirements have been installed:
 
+Ubuntu:
 ```bash
 pip3 install -r requirements.txt
 python3 setup.py install
@@ -15,14 +20,17 @@ python3 setup.py install
 # Usage
 
 ```
-usage: ants [-h] [-g GRIDSIZE] [-s STARTANTS] [-f FOOD] [--nospawn]
+usage: ants [-h] [-g GRIDSIZE] [-c COLONYS] [-s STARTANTS] [-f FOOD]
+            [--nospawn]
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -g GRIDSIZE, --gridsize GRIDSIZE
-                        Size of ants grid. Default 25
-  -s STARTANTS, --startants STARTANTS
-                        Number of ants spawned at start. Default 25
-  -f FOOD, --food FOOD  Number of food fields at start. Default 100
-  --nospawn             Prevent spawning new ants
+  optional arguments:
+    -h, --help            show this help message and exit
+    -g GRIDSIZE, --gridsize GRIDSIZE
+                          Size of ants grid. Default 25
+    -c COLONYS, --colonys COLONYS
+                          Number of ant colonys created. Default 1
+    -s STARTANTS, --startants STARTANTS
+                          Number of ants spawned at start. Default 25
+    -f FOOD, --food FOOD  Number of food fields at start. Default 100
+    --nospawn             Prevent spawning new ants
 ```

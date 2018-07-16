@@ -1,17 +1,18 @@
 import random
 import time
+import pprint
 
 
 class Field(object):
 
     def __init__(self, x=0, y=0, food=0,
-                 blocked=False, home=False, antcount=0
+                 blocked=False, is_home=False, antcount=0
                  ):
         self.x = x
         self.y = y
         self.food = food
         self.blocked = blocked
-        self.home = home
+        self.is_home = is_home
         self.antcount = antcount
 
 
@@ -28,9 +29,17 @@ class Grid(object):
         self.fields = {}
         self.create()
         self.add_food()
-        self.add_home()
+        # self.add_home()
 
-        self.init_neighbours()
+        # self.init_neighbours()
+
+        self.neighbours = {}
+        for field in self.fields.values():
+            x = field.x
+            y = field.y
+            self.neighbours[field] = {}
+            for nfield in self.get_nfields(x, y):
+                self.neighbours[field][nfield] = {}
 
     def create(self):
         for xi in range(self.size_x):
@@ -47,6 +56,7 @@ class Grid(object):
             field.food = random.randint(self.min_food, self.max_food)
 
     def add_home(self):
+        assert False, 'Deprecated!'
         # field = random.choice(self.fields)
         x = int(self.size_x / 2)
         y = int(self.size_y / 2)
@@ -54,17 +64,16 @@ class Grid(object):
         field.home = True
         self.home_field = field
 
-    def init_neighbours(self):
-        self.neighbours = {}
+    def init_traces(self, prefix):
+        food_key = '%s_food_trace' % prefix
+        home_key = '%s_home_trace' % prefix
         for field in self.fields.values():
             x = field.x
             y = field.y
-            self.neighbours[field] = {}
+            # self.neighbours[field] = {}
             for nfield in self.get_nfields(x, y):
-                self.neighbours[field][nfield] = {
-                    'food_trace': 0,
-                    'home_trace': 0
-                }
+                self.neighbours[field][nfield][food_key] = 0
+                self.neighbours[field][nfield][home_key] = 0
 
     def get_field_c(self, cx, cy):
         return self.fields.get((cx, cy))
@@ -84,16 +93,27 @@ class Grid(object):
     def decay_paths(self):
         for field in self.neighbours:
             for neighbour in self.neighbours[field]:
+                '''
                 self.neighbours[field][neighbour]['food_trace'] *= 0.9
                 self.neighbours[field][neighbour]['home_trace'] *= 0.9
+                '''
+                for key in self.neighbours[field][neighbour]:
+                    self.neighbours[field][neighbour][key] *= 0.9
 
 
 class Ant(object):
 
-    def __init__(self, field=None, origin=None, home=None, engine=None,
+    def __init__(self, colony, prefix, field=None, origin=None, home=None, engine=None,
                  grid=None, state='food', inventory_size=5):
+
+        self.colony = colony
+        self.prefix = prefix
+        self.food_key = '%s_food_trace' % self.prefix
+        self.home_key = '%s_home_trace' % self.prefix
+
         self.field = field
         self.origin = origin
+
         self.home = home
         self.engine = engine
 
@@ -116,11 +136,12 @@ class Ant(object):
     def run(self):
 
         pfields = []
-        for field in self.grid.neighbours[self.field]:
+        neighbours = self.grid.neighbours[self.field]
+        for field in neighbours:
             field_d = {
                 'field': field,
-                'food_trace': self.grid.neighbours[self.field][field]['food_trace'],
-                'home_trace': self.grid.neighbours[self.field][field]['home_trace'],
+                'food_trace': neighbours[field][self.food_key],
+                'home_trace': neighbours[field][self.home_key],
             }
             pfields.append(field_d)
 
@@ -177,7 +198,7 @@ class Ant(object):
             pfields = [field_d for field_d in pfields if field_d['field'] != self.origin]
 
         # look for home
-        home_field = [field for field in pfields if field['field'].home]
+        home_field = [field for field in pfields if field['field'] == self.home]
         if home_field:
             new_field = home_field[0]['field']
             self.state = 'return_home'
@@ -195,8 +216,7 @@ class Ant(object):
 
     def return_home(self, pfields):
         if self.inventory > 0:
-            self.engine.food_count += self.inventory
-            self.engine.returns += 1
+            self.colony.food_count += self.inventory
             self.inventory = 0
         else:
             self.excitement = 100000
@@ -217,19 +237,78 @@ class Ant(object):
         pass
 
     def put_trace(self, new_field):
-        for field in self.grid.neighbours[new_field]:
+        neighbours = self.grid.neighbours[new_field]
+        for field in neighbours:
             if field != self.field:
                 continue
             if self.state == 'go_home' or self.state == 'return_home':
-                self.grid.neighbours[new_field][field]['food_trace'] += self.excitement
+                neighbours[field][self.food_key] += self.excitement
             if self.state == 'food' or self.state == 'take_food':
-                self.grid.neighbours[new_field][field]['home_trace'] += self.excitement
+                neighbours[field][self.home_key] += self.excitement
+
+
+class AntColony(object):
+
+    def __init__(self, engine, index, food_count=0, start_ants=50, ant_ai=True,
+                 ant_cost=100, spawn_ants=True):
+
+        self.prefix = 'AntColony%s' % index
+        self.engine = engine
+        self.food_count = food_count
+        self.ant_ai = ant_ai
+        self.ant_cost = ant_cost
+        self.spawn_ants = spawn_ants
+        self.ants = []
+
+        self.pick_home()
+
+        for _ in range(start_ants):
+            self.spawn_ant()
+
+        self.engine.grid.init_traces(self.prefix)
+        print('Colony {} initialized'.format(self.prefix))
+
+    def pick_home(self):
+        self.home = None
+        while self.home is None:
+            # XXX: maybe do more complicated stuff here later
+            home = random.choice(list(self.engine.grid.fields.values()))
+            if not home.is_home:
+                home.is_home = True
+                self.home = home
+
+    def spawn_ant(self):
+        new_ant = Ant(
+            colony=self,
+            prefix=self.prefix,
+            home=self.home,
+            field=self.home,
+            grid=self.engine.grid,
+            engine=self.engine
+        )
+        self.ants.append(new_ant)
+
+    def run(self):
+        '''run all ants and spawn new ones'''
+        for ant in self.ants:
+            ant.run()
+
+        if self.spawn_ants:
+            while self.food_count > self.ant_cost:
+                self.spawn_ant()
+                self.food_count -= self.ant_cost
+
+        print('Colony {prefix} has {ant_count} ants, food available: {food}'.format(
+            prefix=self.prefix,
+            ant_count=len(self.ants),
+            food=self.food_count
+        ))
 
 
 class AntEngine(object):
 
-    def __init__(self, antcount=1, grid_size_x=10, grid_size_y=10,
-                 food_quant=1, inf_food=True, min_food=1000,
+    def __init__(self, colony_count=1, start_ants=50, grid_size_x=10, grid_size_y=10,
+                 food_quant=25, inf_food=True, min_food=1000, ant_cost=100,
                  max_food=5000, spawn_ants=True, ant_ai=True):
 
         self.ant_ai = ant_ai
@@ -237,10 +316,8 @@ class AntEngine(object):
         self.food_count = 0
         self.ants_count = 0
         self.grid_size = grid_size_x  # !!
-        self.returns = 0
 
         self.spawn_ants = spawn_ants
-        self.ant_count = antcount
 
         self.inf_food = inf_food
         self.grid = Grid(
@@ -250,13 +327,31 @@ class AntEngine(object):
             min_food=min_food,
             max_food=max_food
         )
-        self.grid_home = self.grid.home_field
 
+        self.colonys = []
+        for index in range(colony_count):
+            colony = AntColony(
+                index=index,
+                engine=self,
+                food_count=0,
+                start_ants=start_ants,
+                ant_ai=ant_ai,
+                ant_cost=ant_cost,
+                spawn_ants=spawn_ants
+            )
+            self.colonys.append(colony)
+
+        '''
+        pprint.pprint(self.grid.neighbours)
+        assert False, '...and then die'
+        self.grid_home = self.grid.home_field
         self.ants = []
         for _ in range(self.ant_count):
             self.spawn_ant()
+        '''
 
     def spawn_ant(self):
+        assert False, 'Deprecated'
         if not self.ants_count > 15000:
             new_ant = Ant(
                 home=self.grid_home,
@@ -267,22 +362,29 @@ class AntEngine(object):
             self.ants.append(new_ant)
 
     def tick(self):
-        self.ants_count = len(self.ants)
-        print('Ants:', self.ants_count)
+        # self.ants_count = len(self.ants)
+        # print('Ants:', self.ants_count)
         self.grid.decay_paths()
+
+        ants_count = 0
+        for colony in self.colonys:
+            colony.run()
+            ants_count += len(colony.ants)
+        self.ants_count = ants_count
+        '''
         for ant in self.ants:
             ant.run()
             f = ant.field
-            status = 'state: {0} pos: {1} inv: {2}'.format(
-                ant.state, (f.x, f.y), ant.inventory
-            )
 
         if self.spawn_ants:
             while self.food_count > 100:
                 self.spawn_ant()
                 self.food_count -= 100
+        '''
+
 
     def count_ants(self, antfield):
+        assert False, 'whos calling you?'
         ant_list = [
             ant for ant in self.ants if ant.field == antfield
         ]
@@ -290,7 +392,9 @@ class AntEngine(object):
 
 
 if __name__ == '__main__':
-    engine = AntEngine()
+    engine = AntEngine(colony_count=20)
+    # engine = AntEngine()
+
     while True:
         try:
             engine.tick()
