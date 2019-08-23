@@ -82,10 +82,10 @@ class FieldHandler(object):
 
             pygame.draw.rect(
                 field_surface,
-                (red, green, blue),
+                (red, green, blue, 0),
                 (0, 0, self.field_size, self.field_size)
             )
-            field_surface = field_surface.convert()
+            field_surface = field_surface.convert_alpha()
 
             pos = (
                 field.x * self.field_size,

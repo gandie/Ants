@@ -41,13 +41,13 @@ def main(args):
 
         clock.tick(FPS)
         background = pygame.Surface(RESOLUTION)
-        background.fill((0, 0, 0))
-        background = background.convert()
+        background.fill((0, 0, 0, 0))
+        background = background.convert_alpha()
 
         # temporary surface to draw things to
         display = pygame.Surface(RESOLUTION)
-        display.fill((0, 0, 0))
-        display = display.convert()
+        display.fill((0, 0, 0, 0))
+        display = display.convert_alpha()
 
         display.blit(background, (0, 0))
 
