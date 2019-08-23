@@ -34,14 +34,14 @@ class FieldHandler(object):
     def click(self, pos):
         x = int(pos[0] / self.field_size)
         y = int(pos[1] / self.field_size)
-        field = self.grid.get_field_c(x, y)
+        field = self.grid.fields.get((x, y))
         if field is not None:
             field.food += 1000
 
     def right_click(self, pos):
         x = int(pos[0] / self.field_size)
         y = int(pos[1] / self.field_size)
-        field = self.grid.get_field_c(x, y)
+        field = self.grid.fields.get((x, y))
         if field is not None:
             if not field.blocked:
                 field.blocked = True
