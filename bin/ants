@@ -43,8 +43,8 @@ if __name__ == '__main__':
     )
     parser.add_argument(
         '-c',
-        '--colonys',
-        help='Number of ant colonys created. Default 1',
+        '--colonies',
+        help='Number of ant colonies created. Default 1',
         type=int,
         default=1
     )

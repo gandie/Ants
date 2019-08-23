@@ -19,18 +19,20 @@ python3 setup.py install
 
 # Usage
 
+Press ARROW-UP to start simulation, ARROW-DOWN to stop.
+
 ```
-usage: ants [-h] [-g GRIDSIZE] [-c COLONYS] [-s STARTANTS] [-f FOOD]
+usage: ants [-h] [-g GRIDSIZE] [-c COLONIES] [-s STARTANTS] [-f FOOD]
             [--nospawn]
 
-  optional arguments:
-    -h, --help            show this help message and exit
-    -g GRIDSIZE, --gridsize GRIDSIZE
-                          Size of ants grid. Default 25
-    -c COLONYS, --colonys COLONYS
-                          Number of ant colonys created. Default 1
-    -s STARTANTS, --startants STARTANTS
-                          Number of ants spawned at start. Default 25
-    -f FOOD, --food FOOD  Number of food fields at start. Default 100
-    --nospawn             Prevent spawning new ants
+optional arguments:
+  -h, --help            show this help message and exit
+  -g GRIDSIZE, --gridsize GRIDSIZE
+                        Size of ants grid. Default 25
+  -c COLONIES, --colonies COLONIES
+                        Number of ant colonies created. Default 1
+  -s STARTANTS, --startants STARTANTS
+                        Number of ants spawned at start. Default 25
+  -f FOOD, --food FOOD  Number of food fields at start. Default 100
+  --nospawn             Prevent spawning new ants
 ```
