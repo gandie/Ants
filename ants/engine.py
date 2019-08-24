@@ -31,6 +31,8 @@ class Grid(object):
         self.fields = {}
         self.neighbours = {}
 
+        self.trace_decay = 0.9
+
         for xi in range(self.size_x):
             for yi in range(self.size_y):
                 field = Field(
@@ -78,27 +80,28 @@ class Grid(object):
         for field in self.neighbours:
             for neighbour in self.neighbours[field]:
                 for key in self.neighbours[field][neighbour]:
-                    self.neighbours[field][neighbour][key] *= 0.9
+                    self.neighbours[field][neighbour][key] *= self.trace_decay
 
 
 class Ant(object):
 
-    def __init__(self, colony, field=None, origin=None, home=None,
-                 engine=None, grid=None, state='food', inventory_size=5):
+    def __init__(self, colony, field, home, engine, grid, state='food',
+                 inventory_size=5, take_rate=1):
 
         self.colony = colony
+        self.grid = grid
 
         self.field = field
-        self.origin = origin
 
         self.home = home
         self.engine = engine
 
         self.state = state
-        self.grid = grid
+        self.origin = None
 
         self.inventory = 0
         self.inventory_size = inventory_size
+        self.take_rate = take_rate
 
         self.excitement = self.colony.initial_excitement
 
@@ -110,7 +113,8 @@ class Ant(object):
         }
 
     def run(self):
-
+        '''prepare neighbouring fields dict and pass it to current state
+        method'''
         pfields = []
         neighbours = self.grid.neighbours[self.field]
         for field in neighbours:
@@ -124,7 +128,7 @@ class Ant(object):
             pfields.append(field_d)
 
         if self.excitement > 0:
-            self.excitement *= 0.75
+            self.excitement *= self.colony.excitement_decay
 
         if pfields:
             self.state_map[self.state](pfields)
@@ -155,7 +159,7 @@ class Ant(object):
                 new_field = path_field['field']
 
         # pick randomly
-        if not new_field or random.randint(0, 4) == 0:
+        if not new_field or random.random() <= self.colony.random_move_ratio:
             new_field = random.choice(pfields)['field']
 
         self.move(new_field)
@@ -178,7 +182,7 @@ class Ant(object):
                 new_field = path_field['field']
 
         # pick randomly
-        if not new_field or random.randint(0, 4) == 0:
+        if not new_field or random.random() <= self.colony.random_move_ratio:
             new_field = random.choice(pfields)['field']
 
         self.move(new_field)
@@ -195,8 +199,8 @@ class Ant(object):
     def take_food(self, pfields):
         if self.field.food > 0 and self.inventory < self.inventory_size:
             if not self.engine.inf_food:
-                self.field.food -= 1
-            self.inventory += 1
+                self.field.food -= self.take_rate
+            self.inventory += self.take_rate
         else:
             self.state = 'go_home'
             self.excitement = self.colony.initial_excitement
@@ -228,6 +232,11 @@ class AntColony(object):
         self.ants = []
 
         self.initial_excitement = 100000
+        self.excitement_decay = 0.75
+        self.random_move_ratio = 0.2
+
+        self.ant_inventory_size = 5
+        self.ant_take_rate = 1
 
         self.pick_home()
 
@@ -252,7 +261,9 @@ class AntColony(object):
             home=self.home,
             field=self.home,
             grid=self.engine.grid,
-            engine=self.engine
+            engine=self.engine,
+            inventory_size=self.ant_inventory_size,
+            take_rate=self.ant_take_rate
         )
         self.ants.append(new_ant)
 
