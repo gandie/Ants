@@ -100,7 +100,7 @@ class Ant(object):
         self.inventory = 0
         self.inventory_size = inventory_size
 
-        self.excitement = 100000
+        self.excitement = self.colony.initial_excitement
 
         self.state_map = {
             'food': self.search_food,
@@ -188,7 +188,7 @@ class Ant(object):
             self.colony.food_count += self.inventory
             self.inventory = 0
         else:
-            self.excitement = 100000
+            self.excitement = self.colony.initial_excitement
             self.state = 'food'
             self.origin = None
 
@@ -199,7 +199,7 @@ class Ant(object):
             self.inventory += 1
         else:
             self.state = 'go_home'
-            self.excitement = 100000
+            self.excitement = self.colony.initial_excitement
             self.origin = None
 
     def put_trace(self, new_field):
@@ -226,6 +226,8 @@ class AntColony(object):
         self.ant_cost = ant_cost
         self.spawn_ants = spawn_ants
         self.ants = []
+
+        self.initial_excitement = 100000
 
         self.pick_home()
 

@@ -21,7 +21,7 @@ def main(args):
         'spawn_ants': not args.nospawn,
         'startants': args.startants,
         'resolution': RESOLUTION,
-        'colony_count': args.colonys,
+        'colony_count': args.colonies,
     }
 
     pygame.init()
