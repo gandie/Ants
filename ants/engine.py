@@ -21,7 +21,7 @@ class Field(object):
 class Grid(object):
 
     def __init__(self, size_x=10, size_y=10, food_quant=1,
-                 min_food=1000, max_food=5000):
+                 min_food=1000, max_food=5000, trace_decay=0.9):
         self.size_x = size_x
         self.size_y = size_y
         self.food_quant = food_quant
@@ -31,7 +31,7 @@ class Grid(object):
         self.fields = {}
         self.neighbours = {}
 
-        self.trace_decay = 0.9
+        self.trace_decay = trace_decay
 
         for xi in range(self.size_x):
             for yi in range(self.size_y):
@@ -103,6 +103,8 @@ class Ant(object):
         self.inventory_size = inventory_size
         self.take_rate = take_rate
 
+        self.age = 0
+
         self.excitement = self.colony.initial_excitement
 
         self.state_map = {
@@ -115,6 +117,9 @@ class Ant(object):
     def run(self):
         '''prepare neighbouring fields dict and pass it to current state
         method'''
+
+        self.age += 1
+
         pfields = []
         neighbours = self.grid.neighbours[self.field]
         for field in neighbours:
@@ -218,14 +223,14 @@ class Ant(object):
 
 class AntColony(object):
 
-    def __init__(self, engine, index, food_count=0, start_ants=50, ant_ai=True,
+    def __init__(self, engine, index, start_ants=50, ant_ai=True,
                  ant_cost=100, spawn_ants=True):
 
         self.index = index
         self.home_key = 'ht_%s' % index  # ht = home trace
         self.food_key = 'ft_%s' % index  # ft = food trace
         self.engine = engine
-        self.food_count = food_count
+        self.food_count = 0
         self.ant_ai = ant_ai
         self.ant_cost = ant_cost
         self.spawn_ants = spawn_ants
@@ -237,6 +242,7 @@ class AntColony(object):
 
         self.ant_inventory_size = 5
         self.ant_take_rate = 1
+        self.ant_max_age = 1000
 
         self.pick_home()
 
@@ -269,8 +275,16 @@ class AntColony(object):
 
     def run(self):
         '''run all ants and spawn new ones'''
+
         for ant in self.ants:
             ant.run()
+            if ant.age >= self.ant_max_age:
+                ant.field.antcount -= 1
+
+        self.ants = [
+            ant for ant in self.ants
+            if ant.age < self.ant_max_age
+        ]
 
         if self.spawn_ants:
             while self.food_count > self.ant_cost:
@@ -292,9 +306,8 @@ class AntEngine(object):
 
         self.ant_ai = ant_ai
 
-        self.food_count = 0
         self.ants_count = 0
-        self.grid_size = grid_size_x  # !!
+        self.grid_size = grid_size_x  # assuming square grid!!
 
         self.spawn_ants = spawn_ants
 
@@ -312,7 +325,6 @@ class AntEngine(object):
             colony = AntColony(
                 index=index,
                 engine=self,
-                food_count=0,
                 start_ants=start_ants,
                 ant_ai=ant_ai,
                 ant_cost=ant_cost,

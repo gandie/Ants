@@ -10,6 +10,7 @@ class FieldHandler(object):
 
         self.grid_size = grid_size
 
+        # assuming square grid!!
         self.field_size = resolution[0] / self.grid_size
 
         self.engine = AntEngine(
@@ -66,7 +67,10 @@ class FieldHandler(object):
         if field.food > 0:
             red = 255
 
-        ant_count = abs(field.antcount)
+        if field.antcount < 0:
+            field.antcount = 0
+
+        ant_count = field.antcount
         ants_count = float(self.engine.ants_count)
         if ants_count != 0 and ant_count > 0:
             blue = int(10 * 255 * (ant_count / ants_count ** (0.7)))
