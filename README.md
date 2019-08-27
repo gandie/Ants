@@ -21,6 +21,8 @@ python3 setup.py install
 
 Press ARROW-UP to start simulation, ARROW-DOWN to stop.
 
+Use left click to spawn some food, right click to create a blocked field (white)
+
 ```
 usage: ants [-h] [-g GRIDSIZE] [-c COLONIES] [-s STARTANTS] [-f FOOD]
             [--nospawn]
